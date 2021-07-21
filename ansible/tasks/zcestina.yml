@@ -1,0 +1,16 @@
+---
+#
+# Copy and install zimbra-cestina.deb
+#
+
+# Copy package zimbra-cestina to server
+- name: Copy package zimbra-cestina to server
+  copy:
+    src: /etc/ansible/files/zimbra-cestina.deb
+    dest: /root/zimbra-cestina.deb
+
+# Install zimbra-cestina and restart zimbra
+- name: Install zimbra-cestina and restart zimbra
+  apt:
+    deb: /root/zimbra-cestina.deb
+

@@ -1,0 +1,19 @@
+# new and old versions of conffiles, stored by dpkg
+*.dpkg-*
+# new and old versions of conffiles, stored by ucf
+*.ucf-*
+
+# old versions of files
+*.old
+
+# editor temp files
+*~
+.*.sw?
+.sw?
+\#*\#
+DEADJOE
+
+# mac sux
+.DS_Store
+
+source/.git

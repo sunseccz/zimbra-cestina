@@ -1,0 +1,9 @@
+---
+#
+# Playbook to install zcestina
+#
+- hosts: zimbra
+  remote_user: root
+  tasks:
+  - import_tasks: /etc/ansible/tasks/zcestina.yml
+

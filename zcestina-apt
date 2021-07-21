@@ -1,0 +1,63 @@
+#!/bin/bash
+VERSION="8.8"
+DIR_PREKLAD="/opt/zimbra8.8-cestina"
+ 
+#ENCODE="/opt/zimbra/common/lib/jvm/openjdk-1.8.0_144-zimbra/bin/native2ascii"
+#ENCODE="/opt/zimbra/common/lib/jvm/openjdk-1.8.0_172-zimbra/bin/native2ascii"
+ENCODE="/usr/bin/native2ascii"
+ 
+[ ! -f ${ENCODE} ] && apt install openjdk-8-jdk-headless
+ 
+ssh-add -l
+
+# ocekava ze adresar je jiz nakofigurovany jako GIT klon
+# cd /opt/zimbra8.8-cestina
+# git pull
+#
+[ ! -f ${DIR_PREKLAD} ] && git clone git@github.com:sunseccz/zimbra-cestina.git ${DIR_PREKLAD}
+[   -f ${DIR_PREKLAD} ] && git pull
+cd ${DIR_PREKLAD}
+ 
+# vytvorime adresar, do ktereho zkopirujeme soubory
+# 
+APTDIR="/opt/zimbra-cestina"
+ 
+for j in `find . \( ! -regex '.*/\..*' \) -type d`
+do
+        mkdir -p ${APTDIR}/opt/${j}
+done
+ 
+for i in `find . \( ! -regex '.*/\..*' \) -type f -name '*_cs*.properties'`
+do
+#       echo $APTDIR/opt/$i
+        ${ENCODE} -encoding utf8 ${i} ${APTDIR}/opt/${i}
+        chown zimbra.zimbra ${APTDIR}/opt/${i}
+done
+ 
+mkdir ${APTDIR}/DEBIAN
+ 
+cat > ${APTDIR}/DEBIAN/control <<'end_of_control'
+Package: zimbra-cestina
+Version: ${VERSION}
+Architecture: all
+Maintainer: Sunsec s.r.o.
+Installed-Size: 1740
+Depends: zimbra-core (>= ${VERSION})
+Section: localization
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.sunsec.cz/
+Description: Czech localization for Zimbra
+Original-Maintainer: Michal Kondr <michal.kondr@sunsec.cz>
+end_of_control
+ 
+cat > ${APTDIR}/DEBIAN/postinst <<'end_of_postinst'
+#!/bin/bash
+su -l zimbra -c "/opt/zimbra/bin/zmcontrol restart"
+end_of_postinst
+chmod 755 ${APTDIR}/DEBIAN/postinst
+ 
+cd ${APTDIR}
+md5sum $(find * -type f -not -path 'DEBIAN/*') > DEBIAN/md5sums
+cd ..
+dpkg-deb --build zimbra-cestina-${VERSION}
